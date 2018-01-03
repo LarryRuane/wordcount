@@ -86,7 +86,7 @@ func (wch *wcHeap) Pop() interface{} {
 // Read the (already-opened) directory, open each item,
 // send the non-director to the mappers, recurse on
 // the directories.
-func walk_recursive(files chan *os.File, fname string) {
+func walkRecursive(files chan *os.File, fname string) {
 	file, err := os.Open(fname)
 	if err != nil {
 		fmt.Println("bad", err)
@@ -110,18 +110,18 @@ func walk_recursive(files chan *os.File, fname string) {
 		}
 	}
 	for _, name := range dirContents {
-		walk_recursive(files, name)
+		walkRecursive(files, name)
 	}
 	os.Chdir("..")
 	file.Close()
 }
 
 func walk(files chan *os.File, dir string) {
-	walk_recursive(files, dir)
+	walkRecursive(files, dir)
 	close(files)
 }
 
-func commonWords(start_dir string, numWords int) []wc {
+func commonWords(startDir string, numWords int) []wc {
 	// for hashing the words
 	crc32q := crc32.MakeTable(0xD5828281)
 
@@ -131,7 +131,7 @@ func commonWords(start_dir string, numWords int) []wc {
 	// start recursively reading directories and
 	// writing file descriptors to channel 'files'
 	files := make(chan *os.File, 4)
-	go walk(files, start_dir)
+	go walk(files, startDir)
 
 	// *** Reducer threads:
 	var reduceCh [nreducers]chan string
